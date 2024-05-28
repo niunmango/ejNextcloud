@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-config
+data:
+  DB_NAME: "nextcloud"  # Replace if your database name is different
+  

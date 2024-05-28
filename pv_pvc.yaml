@@ -1,0 +1,31 @@
+# Persistent Volume and Claim definition
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nextcloud-storage
+
+spec:
+  capacity:
+    storage: 8Gi  # Adjust storage size as needed
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/nextcloud  # Replace with a path on your host machine
+
+---
+
+# Persistent Volume Claim
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nextcloud-pvc
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi  # Adjust storage size to match PV
+  storageClassName: ""  # Optional: Use a storage class if applicable

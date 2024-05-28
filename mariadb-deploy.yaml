@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:11.3.2  # Adjust image version if needed
+        ports:
+        - containerPort: 3306
+        envFrom:  # Use environment variables from both sources
+        - secretRef:  # Reference the Secret for credentials
+            name: nextcloud-db-credentials
+        - configMapRef:  # Reference the ConfigMap for DB_NAME
+            name: nextcloud-config
+        env:  # Additional environment variables
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
