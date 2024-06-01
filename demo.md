@@ -235,3 +235,26 @@ spec:
             port:
               number: 80 
 ```
+
+## 7. Acceder por web y terminar configuración
+
+Una vez verificado que los pods estén en funcionamiento:
+
+```shell
+$ kubectl get pods 
+NAME                             READY   STATUS    RESTARTS   AGE
+mariadb-db-795d85c69b-74h7c      1/1     Running   0          16h
+nextcloud-app-6cc675d87b-5gwf2   1/1     Running   0          16h
+```
+
+Acceder a la web de ingreso (en este ejemplo http://microk.local). Tener en cuenta que el servidor DNS debe resolver esta dirección a la del servidor K8s.
+
+![Captura ininicio](Screenshot_20240601_nextcloudstart.png)
+
+Debe reutilizarse el usuario y la clave configurados en ```secret.yaml``` para poder acceder y también para que utilice la base de datos configurada previamente. La URL de la base de datos será la configurada en su correspondiente servicio (```mariadb-service.yaml```)
+
+---
+### Instalación exitosa
+
+![Captura instalación exitosa](Screenshot_20240601_nextcloud.png)
+
