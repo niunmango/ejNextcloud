@@ -14,16 +14,26 @@ spec:
     spec:
       containers:
       - name: mariadb
-        image: mariadb:11.3.2  # Adjust image version if needed
+        image: mariadb:11.3.2
         ports:
         - containerPort: 3306
-        envFrom:  # Use environment variables from both sources
-        - secretRef:  # Reference the Secret for credentials
-            name: nextcloud-db-credentials
-        - configMapRef:  # Reference the ConfigMap for DB_NAME
-            name: nextcloud-config
-        env:  # Additional environment variables
-        - name: MARIADB_ROOT_PASSWORD
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: nextcloud-config
+              key: DB_NAME
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: username
+        - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: nextcloud-db-credentials

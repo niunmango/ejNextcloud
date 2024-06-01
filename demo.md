@@ -36,7 +36,7 @@ kind: ConfigMap
 metadata:
   name: nextcloud-config
 data:
-  DB_NAME: "nextcloud"  # Replace if your database name is different
+  DB_NAME: "nextcloud"  # Reemplazar para usar otro nombre de BDD
 
 ```
 **3. Crear Deployment para la base de datos MariaDB:**
@@ -63,17 +63,42 @@ spec:
         image: mariadb:11.3.2
         ports:
         - containerPort: 3306
-        envFrom:  # Variables de entorno
-        - secretRef:  # Secreto para las credenciales
-            name: nextcloud-db-credentials
-        - configMapRef:  # ConfigMap para DB_NAME
-            name: nextcloud-config
-        env:  # También es necesaria la clave de root
-        - name: MARIADB_ROOT_PASSWORD
+        env:
+        - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: nextcloud-db-credentials
               key: password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: nextcloud-config
+              key: DB_NAME
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
+```
+y su correspondiente servicio:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-service
+spec:
+  selector:
+    app: mariadb
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
 ```
 
 **4. Crear PV y PVC**
@@ -135,11 +160,41 @@ spec:
         volumeMounts:
         - name: nextcloud-data
           mountPath: /var/www/html
-        envFrom:
-        - secretRef:
-            name: nextcloud-db-credentials
-        - configMapRef:
-            name: nextcloud-config
+        env:
+        - name: DATABASE_HOST
+          value: "mariadb-service"
+        - name: DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: nextcloud-config
+              key: DB_NAME
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: username
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
+        - name: MEMCACHE_HOST
+          value: "localhost"
+        - name: MEMCACHE_PORT
+          value: "11211"
+        - name: NEXTCLOUD_URL_BASE
+          value: "http://microk.local"
+        - name: NEXTCLOUD_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: username
+        - name: NEXTCLOUD_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
+        
       volumes:
       - name: nextcloud-data
         persistentVolumeClaim:

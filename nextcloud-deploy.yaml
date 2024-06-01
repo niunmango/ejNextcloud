@@ -20,11 +20,41 @@ spec:
         volumeMounts:
         - name: nextcloud-data
           mountPath: /var/www/html
-        envFrom:
-        - secretRef:
-            name: nextcloud-db-credentials
-        - configMapRef:
-            name: nextcloud-config
+        env:
+        - name: DATABASE_HOST
+          value: "mariadb-service"
+        - name: DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: nextcloud-config
+              key: DB_NAME
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: username
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
+        - name: MEMCACHE_HOST
+          value: "localhost"
+        - name: MEMCACHE_PORT
+          value: "11211"
+        - name: NEXTCLOUD_URL_BASE
+          value: "http://microk.local"
+        - name: NEXTCLOUD_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: username
+        - name: NEXTCLOUD_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nextcloud-db-credentials
+              key: password
+        
       volumes:
       - name: nextcloud-data
         persistentVolumeClaim:
